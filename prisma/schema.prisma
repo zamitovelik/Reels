@@ -1,0 +1,58 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model TrendEntry {
+  id             Int      @id @default(autoincrement())
+  sourceUrl      String
+  platform       String // "tiktok" | "reels" | "shorts" | "other" — validated in app code, see src/types/trend.ts
+  niche          String
+  title          String
+  viewCount      Int?
+  likeCount      Int?
+  commentCount   Int?
+  shareCount     Int?
+  dateFound      DateTime @default(now())
+  status         String   @default("idea") // "idea" | "in_progress" | "adapted" | "published"
+  notes          String?
+  adaptationIdea String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model Competitor {
+  id         Int      @id @default(autoincrement())
+  name       String
+  profileUrl String
+  platform   String // same value set as TrendEntry.platform
+  niche      String
+  region     String   @default("us") // "us" | "ru" — whose market this account plays in
+  followers  Int?
+  avgViews   Int?
+  notes      String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+// Запрос на разбор ролика. Сейчас разбор пишется вручную в дашборде,
+// позже это же поле заполняет ИИ-агент — модель под это уже готова.
+model Lead {
+  id        Int      @id @default(autoincrement())
+  name      String
+  contact   String
+  videoUrl  String?
+  platform  String? // определяется из ссылки, см. src/lib/platform.ts
+  message   String?
+  status    String   @default("new") // "new" | "in_review" | "done"
+  feedback  String? // результат разбора, который уходит клиенту
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+}
